@@ -1,0 +1,19 @@
+{
+  "name": "massive",
+  "description": "Skills and the hosted MCP server for Massive.com market data: auth and host, REST vs WebSocket vs Flat Files, entitlements, and accurate historical numbers.",
+  "version": "0.3.0",
+  "author": {
+    "name": "Massive"
+  },
+  "homepage": "https://massive.com/docs",
+  "license": "MIT",
+  "keywords": [
+    "market-data",
+    "api",
+    "agent",
+    "skills",
+    "finance"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./mcp.json"
+}
