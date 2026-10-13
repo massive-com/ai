@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "massive": {
+      "type": "http",
+      "url": "https://mcp.massive.com",
+      "note": "Official hosted Massive MCP server. OAuth on first connection via auth.massive.com; no API key to paste. Optional - the skills work over direct REST without it."
+    }
+  }
+}

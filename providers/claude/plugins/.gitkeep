@@ -1,0 +1,4 @@
+# Customer-facing Claude Code plugins go here, one directory each.
+# See ../README.md for the bar they have to clear, and ../../CONTRIBUTING.md
+# for the two catalog entries each one needs.
+# Remove this file once the first plugin lands.
