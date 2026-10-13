@@ -1,0 +1,17 @@
+{
+  "name": "massive-plugins",
+  "owner": {
+    "name": "Massive"
+  },
+  "metadata": {
+    "description": "Massive.com market-data plugins for Cursor."
+  },
+  "plugins": [
+    {
+      "name": "massive",
+      "source": "providers/claude/plugins/massive",
+      "description": "Skills and the hosted MCP server for Massive.com market data: auth and host, REST vs WebSocket vs Flat Files, entitlements, and accurate historical numbers.",
+      "version": "0.3.0"
+    }
+  ]
+}
