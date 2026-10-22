@@ -7,7 +7,7 @@ description: "Use when computing anything numeric from Massive.com market data o
 
 Getting the numbers right when Massive data feeds a calculation. On financial data a confidently wrong number is worse than no number, so compute the unforgiving parts deterministically (generated code or a source function), verify against a known anchor, and signal an explicit gap rather than guess. Never eyeball a numeric transform.
 
-This is the correctness spine the analysis recipes (`massive-backtest`, `massive-screen`, `massive-earnings-prep`, `massive-market-brief`) build on. For reading a single response (FMV fallback, ticker formats, bar timestamps, the freshness signal) see `massive-data-shapes`; for what a key is entitled to see `massive-catalog`.
+This is the correctness spine the analysis recipes (`massive-backtest`, `massive-screen`, `massive-earnings-prep`, `massive-market-brief`) build on. For reading a single response (FMV fallback, ticker formats, bar timestamps, the freshness signal) see `massive-api/references/massive-data-shapes.md`; for what a key is entitled to see `massive-api/references/massive-catalog.md`.
 
 ## The traps, and the rule for each
 
@@ -27,8 +27,8 @@ This is the correctness spine the analysis recipes (`massive-backtest`, `massive
 - For all listed US stocks on a past date (including later-delisted names), Massive's reference data has it: see `massive-universe`. For index membership, get a **point-in-time** list from another source, then query those tickers per period.
 
 ### 4. Freshness: stale data returns with no error
-- Entitlement (real-time / delayed / EOD) is not API-queryable. Read freshness from the response: `last_trade.timeframe` on a v3 snapshot, or timestamp lag on a v2 snapshot (see `massive-data-shapes`), not the envelope `status`.
-- Delayed or EOD data comes back looking normal. Building a "live" number on 15-minute-old or prior-session data is a silent error. If the user expects live and the class is delayed, that's a plan limit (`massive-catalog`) - say so.
+- Entitlement (real-time / delayed / EOD) is not API-queryable. Read freshness from the response: `last_trade.timeframe` on a v3 snapshot, or timestamp lag on a v2 snapshot (see `massive-api/references/massive-data-shapes.md`), not the envelope `status`.
+- Delayed or EOD data comes back looking normal. Building a "live" number on 15-minute-old or prior-session data is a silent error. If the user expects live and the class is delayed, that's a plan limit (`massive-api/references/massive-catalog.md`) - say so.
 
 ## Where the math runs
 

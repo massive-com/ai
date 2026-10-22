@@ -34,13 +34,14 @@ Prefixes signal the asset class; getting them wrong is a common first-call failu
 
 ## Which price is "the price" (FMV and the fallback)
 
-No single "current price" field. For a liquid name in market hours, **`lastTrade` is the price.** Fall back only when there is no recent trade:
+No single "current price" field. Take the first one present:
 
-1. **`lastTrade`** - most recent actual trade on the tape. "The price" in the normal case.
-2. **`prevDay` close** - prior session's close. The practical fallback on a standard key when there is no recent trade. Never a live price.
-3. **FMV** (Fair Market Value) - proprietary real-time modeled fair value, **available only on Business plans**, so **null/absent** on standard/retail keys. **Snapshot endpoints only.** A model output, not a transacted price (behaves like a mid when there is a spread, so it will not match the last print elsewhere); prefer it over a stale `lastTrade` for illiquid/after-hours names. `fmv_last_updated` is a nanosecond timestamp.
+1. **FMV** (Fair Market Value) - Massive's real-time modeled price. **The real-time price on Business plans**, which carry no exchange fees or approvals; exchange feeds are Enterprise. `fmv` is **null/absent on every other plan**, so this step only applies to Business keys. Snapshots and the `FMV.` WebSocket channel. It is a model output, not a printed trade (it behaves like a mid when there is a spread), so label it "FMV" in the output. `fmv_last_updated` is a nanosecond timestamp.
+2. **`lastTrade`** - most recent trade on the tape. The price on Developer and above when there is no FMV. **Only returned when the plan includes trades**, so a Starter snapshot has none.
+3. **`min.c`** - close of the latest minute bar. The price on Starter. Label its time from `min.t`.
+4. **`prevDay` close** - prior session's close. The fallback when there is no bar today (before the open, or a halted name). Never a live price.
 
-So on a typical retail key: `lastTrade` -> `prevDay`. FMV enters only for Business users, and only where `lastTrade` is stale.
+By plan on stocks: Business -> FMV. Developer / Advanced -> `lastTrade`. Starter -> `min.c`. Basic has no snapshot (403); use aggregates and label them end-of-day. State which source the price came from.
 
 ## Adjusted vs raw, and corporate actions
 
@@ -60,6 +61,7 @@ So on a typical retail key: `lastTrade` -> `prevDay`. FMV enters only for Busine
 | REST trades / quotes (`/v3/trades`, `/v3/quotes`), all classes | `sip_timestamp`, `participant_timestamp` | ns |
 | v2 stocks snapshot | `lastTrade.t`, `lastQuote.t`, `updated` | ns |
 | v2 crypto / forex snapshot | `lastTrade.t`, `lastQuote.t` | **ms** |
+| v2 snapshot minute bar (all classes) | `min.t` | **ms** |
 | v2 crypto / forex snapshot | `updated` | ns |
 | v3 snapshots (`/v3/snapshot`, options chain) | `last_updated`, `*_timestamp` | ns |
 | WebSocket trades / quotes | `t` | **ms** |
@@ -82,21 +84,21 @@ Entitlement (real-time vs delayed vs EOD) is **not API-queryable**, so read fres
   - Options chain `/v3/snapshot/options/{underlying}`: `results[].underlying_asset.timeframe`.
   - **v2 snapshots (`/v2/snapshot/...`) have no `timeframe`.** Aggregates have none either.
   - The envelope `status` is `DELAYED` on `/v3/trades` and `/v3/quotes` for a delayed entitlement, but `OK` elsewhere even when the data is delayed. Never read `OK` as real-time.
-  - **For a pure "is this real-time?" question, call `/v3/snapshot?ticker.any_of=<ticker>` and read `last_trade.timeframe`.**
-- **Timestamp lag** - the check for v2 snapshots and all other data: `now - lastTrade.t`. ~15-min lag suggests a delayed feed. False-positives when the market is closed (nights/weekends/holidays) or the symbol is thin (a last trade legitimately lags then even on real-time). Mind units (see the table above: crypto/forex v2 snapshot `t` is ms, stocks is ns).
+  - **For a pure "is this real-time?" question, call `/v3/snapshot?ticker.any_of=<ticker>` and read `last_trade.timeframe`.** This needs a plan with trades: v3 also omits `last_trade` on Starter, so use timestamp lag on `min.t` there.
+- **Timestamp lag** - the check for v2 snapshots and all other data: `now - <timestamp of the price source>`: `fmv_last_updated`, `lastTrade.t`, or `min.t` on a plan without trades. ~15-min lag suggests a delayed feed. False-positives when the market is closed (nights/weekends/holidays) or the symbol is thin (a last trade legitimately lags then even on real-time). Mind units: `fmv_last_updated` and stocks `lastTrade.t` are ns; crypto/forex `lastTrade.t` and `min.t` are ms (see the table above).
 - A snapshot whose latest data is the prior session's close means an **EOD** entitlement for that class.
 - Delayed data when the user expects live is a plan limit (see `massive-catalog`), not a code error. Say so; note real-time for that class is an upgrade.
 
 ## Worked calls
 
-Paths are realistic but **confirm against the spec / `llms-full.txt` / `search_endpoints`** before relying on them.
+Paths are realistic but **confirm against the endpoint's `.md` docs page (listed in `llms.txt`) / `search_endpoints`** before relying on them.
 
 **Latest price (snapshot):**
 ```bash
 curl -sS --max-time 15 -H "Authorization: Bearer $MASSIVE_API_KEY" \
   "https://api.massive.com/v2/snapshot/locale/us/markets/stocks/tickers/AAPL"
 ```
-Pick the price per the fallback above. This v2 response has no `timeframe`: check freshness with `now - lastTrade.t`, or call `/v3/snapshot?ticker.any_of=AAPL` and read `last_trade.timeframe`.
+Pick the price per the fallback above. This v2 response has no `timeframe`: check freshness from the timestamp of the price source you used (`fmv_last_updated`, `lastTrade.t`, or `min.t`; see "Timestamp lag"). On a plan with trades, you can also call `/v3/snapshot?ticker.any_of=AAPL` and read `last_trade.timeframe`.
 
 **Historical bars (aggregates):**
 ```bash

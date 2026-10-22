@@ -50,10 +50,28 @@ Per-market connections: `ws.stocks()`, `ws.options()`, `ws.crypto()`, `ws.forex(
 
 **Go**
 ```go
-c, _ := massivews.New(massivews.Config{APIKey: key, Feed: massivews.Delayed, Market: massivews.Stocks})
-c.Subscribe(massivews.StocksTrades, "AAPL")
-c.Connect()
-for out := range c.Output() { /* type-switch on models.EquityTrade, etc. */ }
+c, err := massivews.New(massivews.Config{APIKey: key, Feed: massivews.Delayed, Market: massivews.Stocks})
+if err != nil {
+	log.Fatal(err)
+}
+if err := c.Subscribe(massivews.StocksTrades, "AAPL"); err != nil {
+	log.Fatal(err)
+}
+if err := c.Connect(); err != nil {
+	log.Fatal(err)
+}
+// A bad key does not fail Connect(). The auth failure arrives on c.Error().
+for {
+	select {
+	case err := <-c.Error():
+		log.Fatal(err)
+	case out, more := <-c.Output():
+		if !more {
+			return
+		}
+		_ = out // type-switch on models.EquityTrade, etc.
+	}
+}
 ```
 
 ## Subscribe: channels and message shape

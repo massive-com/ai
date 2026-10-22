@@ -23,8 +23,14 @@ Calls use `Authorization: Bearer $MASSIVE_API_KEY`. Get a key at massive.com.
 
 ## MCP (optional)
 
-Registers the hosted Massive MCP (`mcp.massive.com`, OAuth) as an optional accelerant for interactive lookups. The skills work over direct REST without it.
+The plugin does not register an MCP server. The skills work over direct REST. For faster interactive lookups, add the hosted Massive MCP (OAuth, one browser login):
+
+```bash
+claude mcp add --transport http massive https://mcp.massive.com
+```
+
+In Cursor, add `"massive": { "url": "https://mcp.massive.com" }` under `mcpServers` in `~/.cursor/mcp.json`.
 
 ## Cursor
 
-The same directory is also a Cursor plugin. Cursor reads `.cursor-plugin/plugin.json` and `mcp.json`. Claude Code reads `.claude-plugin/plugin.json` and `.mcp.json`. Both manifests point at the one `skills/` directory, so a skill change ships to both clients. Keep the two MCP files in step. `scripts/check_catalog.py` at the repo root checks that the Cursor versions match `.claude-plugin/plugin.json`.
+The same directory is also a Cursor plugin. Cursor reads `.cursor-plugin/plugin.json`. Claude Code reads `.claude-plugin/plugin.json`. Both manifests point at the one `skills/` directory, so a skill change ships to both clients. `scripts/check_catalog.py` at the repo root checks that the Cursor versions match `.claude-plugin/plugin.json`.

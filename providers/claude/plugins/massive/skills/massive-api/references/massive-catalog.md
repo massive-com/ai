@@ -2,7 +2,7 @@
 
 What Massive offers and to whom, so an agent never builds on data that is missing, unentitled, or silently stale.
 
-**Do not hardcode plan prices or limits.** They change. This file teaches the *structure*; fetch current specifics from the products API and read entitlement from responses. Numbers below are illustrative (verified 2026-07-30), not current quotes.
+**Do not hardcode plan prices or limits.** They change. This file teaches the *structure*. For current tiers, read the **Plan Access** section on each endpoint's docs page, and read entitlement from responses. Numbers below are illustrative (verified 2026-07-30), not current quotes.
 
 ## Contents
 
@@ -63,8 +63,6 @@ So **do not assume news, fundamentals, or ETF analytics just because stocks work
 
 ## Benzinga endpoints
 
-Use these paths directly. Do not fetch `llms-full.txt` to find them.
-
 | Path | Use |
 | --- | --- |
 | `/benzinga/v2/news` | Benzinga articles: `title`, `teaser`, `body`, `tickers`, `channels`, `published` |
@@ -105,5 +103,4 @@ Non-professional = a natural person using data solely for personal, non-business
 - Live entitlement (which plan a key holds) is **not API-queryable**. Do not claim to know it.
 - On 401/403/`NOT_AUTHORIZED`: treat as auth or entitlement, not code. Name the likely cause (missing asset class, tier, or add-on) and point to check/upgrade.
 - On stale-looking data: check freshness from the response, attribute to tier, note real-time for that class is an upgrade.
-- Never hardcode prices/limits; fetch current plan/product data from the products API.
-- To find what tier an endpoint needs, read that endpoint's docs page - each has an authoritative **Plan Access / Plan History / Plan Recency** section. Do not rely on a memorized matrix; the ladder shifts.
+- Never hardcode prices/limits. To find what tier an endpoint needs, read that endpoint's docs page - each has an authoritative **Plan Access / Plan History / Plan Recency** section. Do not rely on a memorized matrix; the ladder shifts.
