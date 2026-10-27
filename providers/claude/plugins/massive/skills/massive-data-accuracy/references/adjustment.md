@@ -8,7 +8,7 @@ Turning raw Massive bars + corporate actions into a correct adjusted series. The
 - Dividends: `/stocks/v1/dividends?ticker=<T>`. Fields: `ex_dividend_date`, `cash_amount`, `split_adjusted_cash_amount`, `distribution_type`, `historical_adjustment_factor`.
 - Do not use `/v3/reference/splits` or `/v3/reference/dividends`. They are deprecated and use different field names.
 
-Match actions to bars on the **ex-date** (`ex_dividend_date`, `execution_date`). Normalize timestamp units first (bar `t` is milliseconds; see `massive-data-shapes`).
+Match actions to bars on the **ex-date** (`ex_dividend_date`, `execution_date`). Normalize timestamp units first (bar `t` is milliseconds; see `massive-api/references/massive-data-shapes.md`).
 
 ## Modes
 - `raw` - as traded.
