@@ -11,7 +11,7 @@ metadata:
 
 List every US stock that was listed on a past date, including names delisted later. Massive's reference data has this, so do not source it elsewhere. The traps: old records with empty fields, tickers reused by a different company later, and wrong CIKs.
 
-> **PREREQUISITE:** load `massive-api` (host, auth, pagination) and `massive-data-accuracy` (survivorship, do-not-invent). Confirm paths against the spec / `llms-full.txt` / `search_endpoints`.
+> **PREREQUISITE:** load `massive-api` (host, auth, pagination) and `massive-data-accuracy` (survivorship, do-not-invent). Confirm paths against the endpoint's `.md` docs page (listed in `llms.txt`) / `search_endpoints`.
 
 This recipe gives **all listed names**, not an index. Massive has no index membership (no "S&P 500 on date D"); for that, get the membership list elsewhere.
 
@@ -33,7 +33,7 @@ This recipe gives **all listed names**, not an index. Massive has no index membe
 8. **Present:** the date, the count by type (including `unknown` and guessed), how many are no longer listed (with and without a known date), the unresolved names, and how you classified the null-type records.
 
 ## Notes
-- Reference and grouped-daily endpoints are on every plan; history depth depends on the plan (`massive-catalog`).
+- Reference and grouped-daily endpoints are on every plan; history depth depends on the plan (`massive-api/references/massive-catalog.md`).
 - For a backtest across many dates, build the universe per rebalance date, not once. Names enter and leave.
 - The null `type` / `primary_exchange` fields on old records are a known data gap (tracked by Massive Support). Re-check before building workarounds on a newer date.
 

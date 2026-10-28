@@ -11,13 +11,13 @@ metadata:
 
 Open a correct live WebSocket stream. Three failure modes: feed above entitlement (connection rejected), wrong channel prefix for the market (subscription silent), delayed feed shown as real-time.
 
-> **PREREQUISITE:** load `massive-api` (owns REST/WS/Flat-Files routing; `references/massive-websocket` = connect/subscribe, `references/massive-catalog` = entitlement) and `massive-data-accuracy` (freshness, do-not-invent). Verify hosts/channels/message shapes against the WebSocket spec - never invent a `wss://` host.
+> **PREREQUISITE:** load `massive-api` (owns REST/WS/Flat-Files routing; `massive-api/references/massive-websocket.md` = connect/subscribe, `massive-api/references/massive-catalog.md` = entitlement) and `massive-data-accuracy` (freshness, do-not-invent). Verify hosts/channels/message shapes against the WebSocket spec - never invent a `wss://` host.
 
 ## Steps
 
-1. **WS is for live only.** History or backfill -> REST or Flat Files (`massive-flat-files`), not a socket.
-2. **Check entitlement first** (`massive-catalog`, per asset class). **Free tiers have no WS** in any class; use REST. On **stocks, options, indices and futures**, real-time WS = **Advanced**; the lower paid tiers stream **15-min delayed**, or **10-min** on futures. **Crypto and forex (currencies) have no Advanced tier**: the paid Starter plan is already real-time. Not entitled to real-time -> stream **Delayed** and label it, or fall back to REST. Never tell a paid user "unavailable" without checking what their class actually offers.
-3. **Prefer an SDK** (handles host, auth handshake, reconnect). Raw socket only with no SDK: the URL is `wss://<host>/<market>` (e.g. `wss://socket.massive.com/crypto`); the bare host 404s. Hosts, paths and the connection cap are in `massive-websocket`.
+1. **WS is for live only.** History or backfill -> REST or Flat Files (`massive-api/references/massive-flat-files.md`), not a socket.
+2. **Check entitlement first** (`massive-api/references/massive-catalog.md`, per asset class). **Free tiers have no WS** in any class; use REST. On **stocks, options, indices and futures**, real-time WS = **Advanced**; the lower paid tiers stream **15-min delayed**, or **10-min** on futures. **Crypto and forex (currencies) have no Advanced tier**: the paid Starter plan is already real-time. Not entitled to real-time -> stream **Delayed** and label it, or fall back to REST. Never tell a paid user "unavailable" without checking what their class actually offers.
+3. **Prefer an SDK** (handles host, auth handshake, reconnect). Raw socket only with no SDK: the URL is `wss://<host>/<market>` (e.g. `wss://socket.massive.com/crypto`); the bare host 404s. Hosts, paths and the connection cap are in `massive-api/references/massive-websocket.md`.
 4. **Feed must match entitlement:** `RealTime`, `Delayed`, `Business`. Which one a paid plan gets depends on the class (step 2). Too-high feed = **rejected at connect**.
 5. **Correct channel prefix per market** (the common raw-socket bug). `{action:"subscribe", params:"<CHANNEL>.<TICKER>"}`:
    - **Stocks/options/futures:** `T.` trades, `Q.` quotes, `A.` sec aggs, `AM.` min aggs.
@@ -26,7 +26,7 @@ Open a correct live WebSocket stream. Three failure modes: feed above entitlemen
    - **Cross-market:** `FMV.` (Business only), `V.` index values (indices only).
    Messages are a JSON **array**; match each item's `ev` before reading fields.
    **A wrong symbol fails silently:** the server says `subscribed` and sends nothing. No events within a few seconds in market hours = check the symbol format first.
-6. **Timestamps:** streamed trade/quote `t` and agg `s`/`e` = Unix **milliseconds**. REST trades/quotes are nanoseconds. Normalize before comparing (`massive-data-shapes`).
+6. **Timestamps:** streamed trade/quote `t` and agg `s`/`e` = Unix **milliseconds**. REST trades/quotes are nanoseconds. Normalize before comparing (`massive-api/references/massive-data-shapes.md`).
 7. **Label freshness.** `Delayed` = 15 min behind on stocks/options/indices, 10 min on futures; say so. Arriving != real-time.
 
 ## Notes
